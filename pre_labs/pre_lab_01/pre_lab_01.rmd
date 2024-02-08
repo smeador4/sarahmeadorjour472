@@ -37,7 +37,7 @@ The library function loads an R library such as the tidyverse, providing access 
 
 ### Task 1: The console
 
-**Task** In the console (look below), type 2+2 and hit enter. What does it return? Type your answer below. **Answer:**
+**Task** In the console (look below), type 2+2 and hit enter. What does it return? Type your answer below. **Answer: 4**
 
 ### Task 2: Variables
 
@@ -55,7 +55,7 @@ number * number
 
 What does it return? Type your answer below:
 
-**Answer:**
+**Answer: 4**
 
 ### Task 3: Install packages
 
@@ -103,7 +103,7 @@ Once it loads, look at the environment window at right in RStudio for umd_course
 glimpse(umd_courses)
 ```
 
-In the space below, write the data type for the "id" column and the "seats" column (it's in light gray, offset by \< \>). **Answer**
+In the space below, write the data type for the "id" column and the "seats" column (it's in light gray, offset by \< \>). **Answer id: chr, seats: dbl**
 
 ### Task 7: Examine data "head"
 
@@ -217,8 +217,10 @@ umd_courses |>
     total_seats = sum(seats),
     mean_seats = mean(seats),
     median_seats = median(seats),
-    min_seats = min(seats),
-    max_seats = max(seats),
+    # add minimum seats here
+    minimum_seats=min(seats),
+    # add maximum seats here
+    maximum_seats=max(seats)
   ) |>
   arrange(desc(total_seats))
 ```
