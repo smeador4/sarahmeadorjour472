@@ -357,6 +357,6 @@ Now that you have seen how to use mutate, filtering and dates, give me three que
 
 1.  I would like to use mutating and filtering to figure out the percentage of all UMD courses that are journalism courses.
 
-2.   I would like to use mutating and filtering to see what percentage of donations to Wes Moore's campaign came from outside of Maryland.
+2.  I would like to use mutating and filtering to see what percentage of donations to Wes Moore's campaign came from outside of Maryland.
 
 3.  I would like to see if any counties had a higher percentage of votes for other candidates rather than Moore.
