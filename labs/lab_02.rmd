@@ -126,6 +126,6 @@ journalism_sports <- umd_courses |> filter(str_detect(title, "Sports") & term ==
     journalism_sports = n()
   ) |>
   arrange(desc(journalism_sports))
-
+a
 head(journalism_sports)
 ```
