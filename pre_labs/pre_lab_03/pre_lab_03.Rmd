@@ -89,7 +89,7 @@ Each row represents a recipient of state grant or loan, along with information a
 
 ### Task 7: Count the number of payments in each category by year:
 
-**Task** Run the following codeblock to count the number of payments. Looking at the result, what jumps out at you as potentially problematic? **Answer**
+**Task** Run the following codeblock to count the number of payments. Looking at the result, what jumps out at you as potentially problematic? **Answer: There are some NA's in the data. The grants are also usually much bigger than the loans. There are also "L"s which may be loans.**
 
 ```{r}
 md_grants_loans |> 
@@ -102,7 +102,7 @@ Any time you are going to focus on a column for analysis, you should check for u
 
 ### Task 8: Find outliers
 
-**Task** Run the following code to arrange the grants & loan data so that the smallest amount is first. Describe what you see. **Answer**
+**Task** Run the following code to arrange the grants & loan data so that the smallest amount is first. Describe what you see. **Answer: There is a grant of only \$60, which is very small compared to other grants.**
 
 ```{r}
 md_grants_loans |> 
@@ -191,7 +191,7 @@ cleaned_md_grants_loans |>
 
 ### Task 7: Get rid of duplicate rows
 
-**Task** Run the following codeblock to use distinct() to get rid of duplicate rows. How many rows does the new dataframe have? Answer below. **Answer**
+**Task** Run the following codeblock to use distinct() to get rid of duplicate rows. How many rows does the new dataframe have? Answer below. **Answer: 17,740**
 
 ```{r}
 # cleaning function
@@ -213,7 +213,7 @@ Let's start by cleaning up the zip field. Remember, some of the rows had a five-
 
 We're going to write code that tells R to make a new column for our zips, keeping the first five digits on the left, and get rid of anything after that by using `mutate()` in concert with `str_sub()`, from the `stringr` package.
 
-**Task** Run the following codeblock to use str_sub() to convert the ZIP codes that have nine digits to five digits, creating a new column. Look at the difference in the result - what changed? **Answer**
+**Task** Run the following codeblock to use str_sub() to convert the ZIP codes that have nine digits to five digits, creating a new column. Look at the difference in the result - what changed? **Answer: The new column only includes the first five numbers of the zip codes.**
 
 ```{r}
 # cleaning function
@@ -278,6 +278,11 @@ cleaned_md_grants_loans
 
 **Task** Write and run code to answer our original question: which zip code has gotten the most amount of money from the Maryland Tourism Board? Does that zip code make sense to you?
 
-```{r}
+Answer: The zip code with the most amount of money from the Maryland Tourism Board is 20001. This zip code is in the District of Columbia, which makes sense as to why its amount of money is so much higher than others.
 
+```{r}
+cleaned_md_grants_loans |>
+  group_by(zip5) |>
+  summarize(total_amount = sum(amount)) |>
+  arrange(desc(total_amount))
 ```
