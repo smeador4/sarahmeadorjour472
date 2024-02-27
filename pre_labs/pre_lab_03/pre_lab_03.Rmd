@@ -281,7 +281,17 @@ cleaned_md_grants_loans
 Answer: The zip code with the most amount of money from the Maryland Tourism Board is 20001. This zip code is in the District of Columbia, which makes sense as to why its amount of money is so much higher than others.
 
 ```{r}
+#my attempt
 cleaned_md_grants_loans |>
+  group_by(zip5) |>
+  summarize(total_amount = sum(amount)) |>
+  arrange(desc(total_amount))
+```
+
+```{r}
+#prof answer
+cleaned_md_grants_loans |>
+  filter(str_detect(source, 'MARYLAND TOURISM BOARD')) |>
   group_by(zip5) |>
   summarize(total_amount = sum(amount)) |>
   arrange(desc(total_amount))
