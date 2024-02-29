@@ -77,7 +77,8 @@ Maybe there is a way to remove extra spaces or look for typos in the data?
 umd_capital <- md_payments |>
   filter(agency_name == 'CAPITAL PROJECTS- UNIVERSITY OF MARYLAND') |>
   group_by(vendor_name) |>
-  summarize(total = sum(amount))
+  summarize(total = sum(amount)) |>
+  arrange(vendor_name)
 ```
 
 Q4: You want to understand how much state grant money went to stem cell research projects each fiscal year. Search the data to find grants that fit that description. Once you find which columns contain the information you want, your code should standardize the data needed to find just the grants for stem cell research in a single filter. Then create a total amount of money for each fiscal year. Write a sentence summarizing how stem cell research funding has changed over time.
