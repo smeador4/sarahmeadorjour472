@@ -1,7 +1,7 @@
 ---
 title: "Reverse Engineering Project"
-author: "Student names here"
-date: "Date here"
+author: "Sarah Meador"
+date: "3/7/24"
 output:
   html_document:
     theme: cerulean
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction 
 
-In this notebook, we are reverse engineering the story, [STORY NAME](STORY URL)
+In this notebook, we are reverse engineering the story, [Thousands of kids are missing from school. Where did they go?](https://projects.apnews.com/features/2023/missing-children/index.html)
 
 ## Load libraries
 
@@ -26,13 +26,21 @@ Loading required libraries for this analysis.
 
 ```{r echo=FALSE, message=FALSE}
 
-```
+library(tidyverse)
+library(janitor)
+library(lubridate)
+
+pop_age <- read_csv("data/population-by-age.csv")|>
+  clean_names() 
+public_enrollment <- read_csv("data/public-enrollment-by-grade.csv")|>
+  clean_names() 
+private_enrollment <- read_csv("data/private-enrollment-by-grade.csv")|>
+  clean_names()
 
 ## Load and Cleaning Data
 
-In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
+#In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
 
-```{r}
 # Load required data
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
@@ -47,14 +55,18 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: [Paste in sentence to engineer here]
+* **Sentence text**: "Public school enrollment plunged during the pandemic. Our analysis shows where the students went. In the 21 states where data was available, enrollment fell by about 700,000 students between the 2019-2020 and 2021-2022 school years."
 * **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
 
 ```{r}
 # Put code to reverse engineer sentence here
 
 # Display results of code below this codeblock
-
+public_enrollment |>
+  filter(enrollment >= 0)|>
+  group_by(sch_year) |>
+  summarize(pub_enrollment = sum(enrollment)) |>
+  mutate(pub_enroll_by_year = pub_enrollment)
 ```
 
 ### Sentence 2
