@@ -56,7 +56,7 @@ In this notebook, we are reverse engineering five sentences from the story.
 ### Sentence 1
 
 * **Sentence text**: "Public school enrollment plunged during the pandemic. Our analysis shows where the students went. In the 21 states where data was available, enrollment fell by about 700,000 students between the 2019-2020 and 2021-2022 school years."
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Analysis summary**: I am not sure how to subtract the numbers with code, but when I did subtract the numbers I got (2021-2022 school year enrollment minus 2019-2020 enrollment) I did not get the same number from the story. This might be because it seems like there is data from more than 21 states in my data. I got about 2.4 million.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -65,8 +65,7 @@ In this notebook, we are reverse engineering five sentences from the story.
 public_enrollment |>
   filter(enrollment >= 0)|>
   group_by(sch_year) |>
-  summarize(pub_enrollment = sum(enrollment)) |>
-  mutate(pub_enroll_by_year = pub_enrollment)
+  summarize(pub_enrollment = sum(enrollment))
 ```
 
 ### Sentence 2
