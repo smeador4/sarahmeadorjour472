@@ -67,7 +67,7 @@ emergency_calls |>
 
 Q2. You want to understand if there's a pattern in the day of the week that overdose calls are made. Add a column to your dataframe that displays what day of the week each date represents. You should search for how to do that using lubridate. Then write code to calculate the number of calls for each day of the week, and add a column to that result that calculates the percentage of all calls that occurred on each day of the week (so you want a dataframe with the day of the week, total number of calls and the percentage of calls on that day out of the total number of all calls). Describe your findings to me.
 
-A2.
+A2. The days with the highest percentages of calls are Friday, Saturday, and Sunday, which makes sense as many people are probably using drugs more during the weekend.
 
 ```{r}
 emergency_calls <- emergency_calls |>
@@ -82,12 +82,16 @@ emergency_calls |>
 
 Q3. Now let's look at locations. Which ones have the most calls? How would you describe them (feel free to search for more information on them)? Is there anything about the structure of the original data that might make you less confident in the counts by location or date?
 
-A3.
+A3. 4540 Silver Spring Rd has the most overdose calls with 36 calls. After Googling the address, I found that the house was recently sold, so I assume the person living there during these calls no longer lives there. The next two most called from places are police departments, which makes sense. I might be less confident about the counts if the data was not entered cleanly, such as someone mistyping an address or typing it with a variation.
 
 ```{r}
-
+emergency_calls |>  
+  group_by(location) |>
+  summarize(location_count = n()) |>
+  mutate(pct_location = (location_count/sum(location_count)*100)) |>
+  arrange(desc(location_count))
 ```
 
 Q4. What's the best story idea or question you've seen as a result of the work you've done in this lab?
 
-A4.
+A4. I would definitely want to know more about the house that has seen 36 calls and would like to know if that person is okay or doing better. It might also be cool to do a story on the increased calls over the weekends.
