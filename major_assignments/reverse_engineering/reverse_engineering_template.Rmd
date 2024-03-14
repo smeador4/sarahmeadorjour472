@@ -111,11 +111,15 @@ pop_age |>
 
 ### Sentence 4
 
--   **Sentence text**: [Paste in sentence to engineer here]
--   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
+-   **Sentence text**: "The analysis doesn't include data from 29 states, including Texas and Illinois, or the unknown numbers of ghost students who are technically enrolled but rarely make it to class.
+-   **Analysis summary**: In my analysis, I could not find evidence that supported the statement, likely because the data has been updated since the story was reported. When I located all the states who provided data, Texas and Illinois were included in my data findings.
 
 ```{r}
 # Put code to reverse engineer sentence here
+all_states <- pop_age |> 
+  group_by(state) |> 
+  summarise( count_state=n() ) |> 
+  arrange(desc(count_state)) 
 
 # Display results of code below this codeblock
 
