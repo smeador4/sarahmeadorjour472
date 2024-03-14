@@ -16,7 +16,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introduction 
+## Introduction
 
 In this notebook, we are reverse engineering the story, [Thousands of kids are missing from school. Where did they go?](https://projects.apnews.com/features/2023/missing-children/index.html)
 
@@ -51,12 +51,13 @@ private_enrollment <- read_csv("data/private-enrollment-by-grade.csv")|>
 ```
 
 ## Sentences to Engineer
+
 In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: "Public school enrollment plunged during the pandemic. Our analysis shows where the students went. In the 21 states where data was available, enrollment fell by about 700,000 students between the 2019-2020 and 2021-2022 school years."
-* **Analysis summary**: I am not sure how to subtract the numbers with code, but when I did subtract the numbers I got (2021-2022 school year enrollment minus 2019-2020 enrollment) I did not get the same number from the story. This might be because it seems like there is data from more than 21 states in my data. I got about 2.4 million.
+-   **Sentence text**: "Public school enrollment plunged during the pandemic. Our analysis shows where the students went. In the 21 states where data was available, enrollment fell by about 700,000 students between the 2019-2020 and 2021-2022 school years."
+-   **Analysis summary**: I am not sure how to subtract the numbers with code, but when I did subtract the numbers I got (2021-2022 school year enrollment minus 2019-2020 enrollment) I did not get the same number from the story. This might be because it seems like there is data from more than 21 states in my data. I got about 2.4 million.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -70,23 +71,39 @@ public_enrollment |>
 
 ### Sentence 2
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+-   **Sentence text**: "California alone showed over 150,000 missing students in the data, and New York had nearly 60,000."
+-   **Analysis summary**: In my analysis, I came to the conclusion that in my updated version of the data, California shows 541,856 missing students from the 2019-2020 school year to the 2021-2022 school year. New York shows 264,796 missing students from these school years in the updated data.
 
 ```{r}
 # Put code to reverse engineer sentence here
+public_enrollment |>
+  filter(state == 'CALIFORNIA') |>
+  group_by(sch_year) |>
+    summarize(total_enrollment = sum(enrollment)) |>
+  summarize(enrollment_change = ((max(total_enrollment)) - (min(total_enrollment))))
 
 # Display results of code below this codeblock
 
 ```
 
+```{r}
+public_enrollment |>
+  filter(state == 'NEW YORK') |>
+  group_by(sch_year) |>
+    summarize(total_enrollment = sum(enrollment)) |>
+  summarize(enrollment_change = ((max(total_enrollment)) - (min(total_enrollment))))
+```
+
 ### Sentence 3
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+-   **Sentence text**: "That leaves an unexpected 230,000 students still unaccounted for in the data."
+-   **Analysis summary**: When looking at the population by school age, from Fall 2021 to Spring 2020, we see a 238,000 population decrease. This confirms their finding but originally it did not seem that this dataset would be the best to showcase this change of school-aged students who may be unaccounted for. The data does not specifically say all of these students are not enrolled in school, so it remains somewhat unclear if it is best for showing their findings.
 
 ```{r}
 # Put code to reverse engineer sentence here
+pop_age |>
+  group_by(est_date) |>
+  summarize(school_age_pop = sum(population))
 
 # Display results of code below this codeblock
 
@@ -94,8 +111,8 @@ public_enrollment |>
 
 ### Sentence 4
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+-   **Sentence text**: [Paste in sentence to engineer here]
+-   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -106,8 +123,8 @@ public_enrollment |>
 
 ### Sentence 5
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+-   **Sentence text**: [Paste in sentence to engineer here]
+-   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
 
 ```{r}
 # Put code to reverse engineer sentence here
