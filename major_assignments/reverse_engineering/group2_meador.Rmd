@@ -57,7 +57,7 @@ In this notebook, we are reverse engineering five sentences from the story.
 ### Sentence 1
 
 -   **Sentence text**: "Public school enrollment plunged during the pandemic. Our analysis shows where the students went. In the 21 states where data was available, enrollment fell by about 700,000 students between the 2019-2020 and 2021-2022 school years."
--   **Analysis summary**: I am not sure how to subtract the numbers with code, but when I did subtract the numbers I got (2021-2022 school year enrollment minus 2019-2020 enrollment) I did not get the same number from the story. This might be because it seems like there is data from more than 21 states in my data. I got about 2.4 million.
+-   **Analysis summary**: We got different results because our analysis included more than 21 states. This sentence in the story does not specify the 21 states where enrollment drops totaled about 700k. We'd need to find out how to filter the states and enrollments for the years.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -66,7 +66,9 @@ In this notebook, we are reverse engineering five sentences from the story.
 public_enrollment |>
   filter(enrollment >= 0)|>
   group_by(sch_year) |>
-  summarize(pub_enrollment = sum(enrollment))
+  summarize(pub_enrollment = sum(enrollment)) |>
+  summarize(enrollment_change = ((max(pub_enrollment)) - (min(pub_enrollment))))
+  
 ```
 
 ### Sentence 2
@@ -97,10 +99,24 @@ public_enrollment |>
 ### Sentence 3
 
 -   **Sentence text**: "That leaves an unexpected 230,000 students still unaccounted for in the data."
--   **Analysis summary**: When looking at the population by school age, from Fall 2021 to Spring 2020, we see a 238,000 population decrease. This confirms their finding but originally it did not seem that this dataset would be the best to showcase this change of school-aged students who may be unaccounted for. The data does not specifically say all of these students are not enrolled in school, so it remains somewhat unclear if it is best for showing their findings.
+-   **Analysis summary**: The population by age summarization shows that there were about 12 million fewer kids enrolled than what should have been. The issue with this is it does not necessarily support the above statement from AP's investigation but we can not be entirely sure because the datasets did not provide us with the number of children who were being homeschooled. It's likely that this would slim down the data for us to best reflect how many students are missing.
 
 ```{r}
 # Put code to reverse engineer sentence here
+private_enrollment <- private_enrollment|>
+  rename(st = state)
+
+enrollment_totals <- public_enrollment |>
+  # join md10 to md21 using the shared GEOID and NAME columns
+  inner_join(private_enrollment, by=c('st', 'grade', 'sch_year'))|>
+mutate(total_enrollment = enrollment.x + enrollment.y)
+
+enrollment_totals |>
+  filter(str_detect(grade, "total"))|>
+  group_by(sch_year)|>
+  summarise(enrollment = sum(total_enrollment)) |>
+  arrange(desc(sch_year))
+
 pop_age |>
   group_by(est_date) |>
   summarize(school_age_pop = sum(population))
@@ -111,15 +127,21 @@ pop_age |>
 
 ### Sentence 4
 
--   **Sentence text**: "The analysis doesn't include data from 29 states, including Texas and Illinois, or the unknown numbers of ghost students who are technically enrolled but rarely make it to class.
--   **Analysis summary**: In my analysis, I could not find evidence that supported the statement, likely because the data has been updated since the story was reported. When I located all the states who provided data, Texas and Illinois were included in my data findings.
+-   **Sentence text**: "Across the states in the analysis, private-school enrollment grew by about 103,000 students."
+-   **Analysis summary**: This shows an additional 40,707 students had enrolled in private school from 2019-2020 to 2021-2022 than AP reported in their investigation. This is likely because additional data was found after publishing.
 
 ```{r}
 # Put code to reverse engineer sentence here
-all_states <- pop_age |> 
-  group_by(state) |> 
-  summarise( count_state=n() ) |> 
-  arrange(desc(count_state)) 
+private_enrollment |>
+filter(enrollment >= 0 & str_detect(grade, "_total"))|>
+  group_by(sch_year) |>
+  summarize(total_enrollment = sum(enrollment))|>
+
+#subtract the years of enrollment
+
+summarise(year_by_year_change = 3674490 - 3530783)
+  
+  
 
 # Display results of code below this codeblock
 
@@ -127,12 +149,15 @@ all_states <- pop_age |>
 
 ### Sentence 5
 
--   **Sentence text**: [Paste in sentence to engineer here]
--   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
+-   **Sentence text**: "The population of school-age kids in the states we studied fell by about 183,000, according to census estimates."
+-   **Analysis summary**: This code shows a decrease in population of school-age kids in the states by 253,566 from April of 2020 to July of 2021, which is higher than AP's calculation because we now have more updated data.
 
 ```{r}
 # Put code to reverse engineer sentence here
-
+pop_age |>
+  group_by(est_date) |>
+  summarize(sum = sum(population)) |>
+  summarize(population_change = ((max(sum)) - (min(sum))))
 # Display results of code below this codeblock
 
 ```
