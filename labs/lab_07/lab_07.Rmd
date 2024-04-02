@@ -105,11 +105,18 @@ moco_pop_overdose <- moco_pop_overdose |>
 
 **Q4** Using [CensusReporter.org](https://censusreporter.org/), examine the zip codes with the highest and lowest rates and compare and contrast their demographic profiles. Is there a story here?
 
-**A4**
+**A4: Zip code 20877 has a large Hispanic population, with 44% of residents being Hispanic. Zip code 20707 has a large black population, with 46% of residents being black. Zip code 20707 also has a smaller poverty rate than zip code 20877, with the former having a rate of 8.9% and the latter having a rate of 13.2%. A story could be found here in seeing if there is a trend between poverty levels and overdose calls and exploring why.**
 
 **Q5** Go back to your joined dataframe from Q3 and add two more columns representing the minimum and maximum populations based on the estimate and margin of error, then calculate per capita rates for each. Do you get the same two zip codes for the highest and lowest as you did before? Does that give you more or less confidence in your answers to Q3?
 
-**A5**
+**A5: I got zip code 20707 again for the zip code with the lowest per capita rate of calls and zip code 20877 again for the zip code with the highest per capita rate of calls. This gives me more confidence in my answers to question 3 because I have accounted for the margin of error and still got the same answers.**
 
 ```{r}
+moco_pop_overdose |>
+  mutate(min = (population - moe)) |>
+  mutate(max = (population + moe)) |>
+  mutate(max_rate_per_1k = (total_calls/min)*1000) |>
+  mutate(min_rate_per_1k = (total_calls/max)*1000) |>
+  arrange(desc(max_rate_per_1k))
+  
 ```
