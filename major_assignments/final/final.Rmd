@@ -1,0 +1,32 @@
+---
+title: "final"
+output: html_document
+date: "2024-04-23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(lubridate)
+```
+
+```{r}
+bgg_data <- read_csv2("data/bgg_dataset.csv") |> clean_names()
+```
+```{r}
+bgg_data |>
+  group_by(domains) |>
+  summarize(count = n()) |>
+  arrange(desc(count))
+```
+
+
+```{r}
+bgg_data |>
+  group_by(domains) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
