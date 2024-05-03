@@ -1,0 +1,125 @@
+---
+title: "Data Analysis Project Group 2: Board Game Ratings"
+author: "Eli Cohen, Sarah Meador, Tim Williams"
+date: "4/24/24"
+output:
+  html_document:
+    theme: cerulean
+    highlight: pygments
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load libraries
+
+```{r}
+options(scipen=999)
+# Load libraries
+library(tidyverse)
+library(janitor)
+```
+
+# Data cleaning and first analysis
+
+The dataset is pulled from BoardGameGeek, a user-submitted content website for game ratings. The data was pulled about three years ago. So it won't show changes over time or current rankings. There 20,343 rows and 14 columns.
+
+An initial analysis of shows about 19,900 games in the dataset. There are thousands more "unranked" games in the website's database that don't have enough reviews to get a ranking and were not included in this dataset.
+
+Most of the columns except the ratings and rankings have some missing data. The mechanics and domain columns are particularly spotty. Both of those have multiple categories in a single cell, so that will need to be separated and sorted.
+
+Overall, though, the dataset seems reasonably comprehensive.
+
+Below we've tried a few ways to analyze the data; not all of them successful yet.
+
+```{r}
+#Dataset was cleaned in OpenRefine to replace semicolon-separated values with comma-separated values, and to convert rating values with commas to values with decimals. It was also clustered to clean about 75 games that had similar name variants.
+bgg <- read_csv("bgg_dataset_clean.csv") |> clean_names()
+
+#count games in set
+bgg |>
+  group_by(name) |>
+  summarise()
+
+#highest rated game by average
+bgg |>
+  group_by(name) |>
+  arrange(desc(rating_average))
+
+#highest ranked game (Board Game Geek standardizes the average rating values, rewarding games with more reviews)
+bgg |>
+  group_by(name) |>
+  arrange(desc(bgg_rank))
+
+#Tim#Average game play time for top 100 games versus all games. Need to eventually exclude rows missing play time, if applicable.
+
+bgg_time <- bgg |>
+  filter(bgg_rank<101) |>
+  mutate(time_total_top = sum(play_time)) |>
+  mutate(time_average_top =(time_total_top/100))
+
+bgg_time_all <- bgg |>
+  mutate(time_total_all = sum(play_time)) |>
+  mutate(time_average_all =(time_total_all/20343))
+
+#Average play time for all games is lower, about 90 minutes, while for the top games it's almost 130 minutes. That likely reflects a preference for longer, more complex games among the board game enthusiasts who care enough to rate games online.
+
+#seeing how many games are in each category, a limitation of this is that we will have to figure out how to separate the ones that have multiple categories listed.
+bgg_domain <-bgg |>
+  group_by(domains) |>
+  summarize(count = n()) |>
+  arrange(desc(count))
+
+#This chunk tells us the average rating for each cluster of games. As mentioned above, we will have to figure out how to separate the domains.
+bgg |>
+  group_by(domains) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+
+#share of how many people rated the game out of how many users own the game. Not sure why some are over 100.
+bgg <- bgg |>
+  mutate(pct_rated = (users_rated/owned_users*100))
+
+```
+
+```{r}
+#This chunk tells us the average rating for each cluster of games. As mentioned above, we will have to figure out how to separate the domains. We have tried many different methods and can't find a good solution to separate the domains since some entries have two listed, but when we figure that out we want to see the average rating per type of game or "domain."
+
+bgg <- bgg |>
+  mutate(
+    family = case_when(
+        str_detect(domains, "Family Games") ~ "family",
+        .default = NA
+    )
+  ) |>
+  mutate(
+    strategy = case_when(
+        str_detect(domains, "Strategy Games") ~ "strategy",
+        .default = NA
+    )
+  )
+
+ratings <- bgg |>
+  group_by(family) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+
+ratings <- bgg |>
+  group_by(strategy) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+
+#trying a bit of a different method
+family_games <- bgg |>
+  filter(str_detect(domains, "Family"))
+  
+family_rating <- family_games |>  
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+

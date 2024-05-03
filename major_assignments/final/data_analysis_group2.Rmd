@@ -53,13 +53,6 @@ bgg |>
     mutate(total_time = sum(play_time)) |>
     mutate(avg_time = total_time/20343)
 
-#average game play time for top 100 games: Getting an error here.
-bgg |>
-  filter(bgg_rank<101) |>
-  group_by(name) |>
-  summarise(count = n()) |>
-  mutate(top_total_time = sum(play_time)) |>
-  mutate(top_avg_time = total_time/count)
 ```
 
 ```{r}
@@ -73,8 +66,21 @@ bgg |>
 
 ```{r}
 #This chunk tells us the average rating for each cluster of games. As mentioned above, we will have to figure out how to separate the domains.
+#bgg |>
+  #group_by(domains) |>
+  #summarize(average = mean(rating_average)) |>
+  #arrange(desc(average))
+
+bgg <- bgg |>
+  mutate(
+    family = case_when(
+        str_detect(domains, "Family Games") ~ "y",
+        .default = "n"
+    )
+  )
+
 bgg |>
-  group_by(domains) |>
+  group_by(family) |>
   summarize(average = mean(rating_average)) |>
   arrange(desc(average))
 ```
@@ -83,4 +89,12 @@ bgg |>
 #percentage of how many people rated the game out of how many users own the game. Not sure why some are over 100.
 bgg <- bgg |>
   mutate(pct_rated = (users_rated/owned_users*100))
+```
+
+```{r}
+#average game play time for top 100 games: Getting an error here.
+bgg |>
+  filter(bgg_rank<101) |>
+  summarise(total_time = sum(play_time)) |>
+  summarise(top_avg_time = total_time/n())
 ```
