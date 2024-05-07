@@ -41,20 +41,29 @@ md_attorney_sanctions <- read_csv("data/md_attorney_sanctions.csv")
 
 ```{r}
 #Create list of unique words
-
+unique_words <- md_attorney_sanctions |> select(text) |>
+  unnest_tokens(word, text)
+View(unique_words)
 ```
 
 ```{r}
 #Load stop words
+data("stop_words")
 
+stop_words <- stop_words
 ```
 
 ```{r}
 #Remove stop words from unique words list
-
+unique_words |>
+  anti_join(stop_words) |>
+  group_by(word) |>
+  tally(sort=TRUE) |>
+  mutate(percent = (n/sum(n))*100) |>
+  top_n(10)
 ```
 
-**A1.**
+**A1. The leading word is "failing." The top ten words seem to describe attorneys failing to do something they were supposed to do. Words like "trust," "account," and "funds," suggest that many concerns with attorneys have to do with financial misconduct.**
 
 ------------------------------------------------------------------------
 
@@ -62,17 +71,31 @@ md_attorney_sanctions <- read_csv("data/md_attorney_sanctions.csv")
 
 ```{r}
 # Check the task 12 on Pre-lab 12 to see if you can use that code
+top_trigrams <- md_attorney_sanctions |>
+  unnest_tokens(trigram, text, token = "ngrams", n = 3) |>
+  separate(trigram, c("word1", "word2", "word3"), sep = " ") |>
+  filter(!word1 %in% stop_words$word) |>
+  filter(!word2 %in% stop_words$word) |>
+  filter(!word3 %in% stop_words$word) |>
+  mutate(trigram = paste(word1, word2, word3, sep=" ")) |>
+  group_by(trigram) |>
+  tally(sort=TRUE) |>
+  mutate(percent = (n/sum(n))*100) |>
+  top_n(10)
 
 ```
 
-**A2.**
+**A2. The top trigram is "attorney trust account," which appears 343 times in the data. The legal definition is "a particular bank account where client funds are kept safe until it is time to withdraw them."**
 
 ------------------------------------------------------------------------
 
 **Q3.** Let's drop back down to more traditional text analysis - take the top trigram from Q2 and write code to see how many times it occurs in the text column in each fiscal year. What do you think the answer produced by your code suggests? What else could you do to try and clarify the most important reasons attorneys get sanctioned?
 
 ```{r}
-
+md_attorney_sanctions |>
+  filter(str_detect(text, "attorney trust account")) |>
+  group_by(fiscal_year) |>
+  summarize(count = n())
 ```
 
-**A3.** 
+**A3. The answers produced by this code show that problems involving attorney trust accounts have increased over the past few years. To clarify, we could read back over the included entries and see how the text uses the phrase "attorney trust accounts".**
