@@ -23,6 +23,7 @@ options(scipen=999)
 # Load libraries
 library(tidyverse)
 library(janitor)
+library(stringr)
 ```
 
 # Data cleaning and first analysis
@@ -65,24 +66,50 @@ bgg |>
 ```
 
 ```{r}
-#This chunk tells us the average rating for each cluster of games. As mentioned above, we will have to figure out how to separate the domains.
-#bgg |>
-  #group_by(domains) |>
-  #summarize(average = mean(rating_average)) |>
-  #arrange(desc(average))
+#This chunk tells us the average rating for each cluster of games. As mentioned above, we will have to figure out how to separate the domains. We have tried many different methods and can't find a good solution to separate the domains since some entries have two listed, but when we figure that out we want to see the average rating per type of game or "domain."
 
 bgg <- bgg |>
   mutate(
     family = case_when(
-        str_detect(domains, "Family Games") ~ "y",
-        .default = "n"
+        str_detect(domains, "Family Games") ~ "family",
+        .default = NA
+    )
+  ) |>
+  mutate(
+    strategy = case_when(
+        str_detect(domains, "Strategy Games") ~ "strategy",
+        .default = NA
     )
   )
 
-bgg |>
+ratings <- bgg |>
   group_by(family) |>
   summarize(average = mean(rating_average)) |>
   arrange(desc(average))
+
+ratings <- bgg |>
+  group_by(strategy) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+
+#trying a bit of a different method
+family_games <- bgg |>
+  filter(str_detect(domains, "Family"))
+  
+family_rating <- family_games |>  
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+
+```{r}
+#
+family_games <- bgg |>
+  filter(str_detect(domains, "Family"))
+  
+family_rating <- family_games |>  
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+
 ```
 
 ```{r}
@@ -97,4 +124,13 @@ bgg |>
   filter(bgg_rank<101) |>
   summarise(total_time = sum(play_time)) |>
   summarise(top_avg_time = total_time/n())
+```
+
+```{r}
+bgg [c('type1', 'type2', 'type3')] <- str_split_fixed(bgg$domains, ',', 3) |>
+  filter(str_detect(type1, 'Strategy Games')) 
+```
+
+```{r}
+
 ```
