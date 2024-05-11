@@ -1,0 +1,175 @@
+---
+title: "data_analysis_group2final"
+output: html_document
+date: "2024-05-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+options(scipen=999)
+# Load libraries
+library(tidyverse)
+library(janitor)
+library(stringr)
+library(corrr)
+```
+
+The dataset is pulled from BoardGameGeek, a user-submitted website for game ratings. The data was pulled about three years ago. There 20,343 rows and 14 columns. An initial analysis of shows about 19,900 games in the dataset. There are some columns with some missing data, such as year published.
+
+```{r}
+#Dataset was cleaned in OpenRefine to replace semicolon-separated values with comma-separated values, and to convert rating values with commas to values with decimals. It was also clustered to clean about 75 games that had similar name variants.
+bgg <- read_csv("bgg_dataset_clean.csv") |> clean_names()
+```
+
+**Question 1:** What type of board games have the highest average rating?
+
+**Answer:** Strategy Games (6.957982)
+
+**Analysis:** For this question, we wanted to figure out which type of game had the highest average rating. This was pretty difficult because of the way the data was structured. For the types, or “domains” of games, many entries had multiple domains listed and separated by commas. On our first attempt, by simply grouping by domain and finding the average ratings, we got results that had combinations of multiple domains. To find out the average ratings for a single domain, we tried to figure out a way to separate the multiple domains. After trying an str_split_fixed function, we were able to get the columns separated but still struggled to figure out a way to combine all of them since they were now in separate columns. We decided to simply make a dataframe for each category of game and then manually check which one was the highest. This wasn’t so bad because we didn’t have that many different domains, but would have been much worse if we had a lot of domains.
+
+```{r}
+wargames_avg <- bgg |>
+  filter(str_detect(domains, "Wargames")) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+
+```{r}
+strategy_avg <- bgg |>
+  filter(str_detect(domains, "Strategy Games")) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+
+```{r}
+thematic_avg <- bgg |>
+  filter(str_detect(domains, "Thematic Games")) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+
+```{r}
+family_avg <- bgg |>
+  filter(str_detect(domains, "Family Games")) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+
+```{r}
+custom_avg <- bgg |>
+  filter(str_detect(domains, "Customizable Games")) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+
+```{r}
+abstract_avg <- bgg |>
+  filter(str_detect(domains, "Abstract Games")) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+
+```{r}
+party_avg <- bgg |>
+  filter(str_detect(domains, "Party Games")) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+
+```{r}
+children_avg <- bgg |>
+  filter(str_detect(domains, "Children's Games")) |>
+  summarize(average = mean(rating_average)) |>
+  arrange(desc(average))
+```
+
+**Question 2:** What is the “perfect length” of a board game?
+
+**Answer:** 120 minutes
+
+**Analysis:** For the top 50 highest-rated games, we wanted to find the average amount of play time to see what the “perfect” length of a board game is. For some reason, the function to find the top 50 would not work, so we looked at the dataset to see what the rating was for the 50th game and made our filter greater than or equal to that number to get the top 50. We then arranged them and found the median play time. We decided to go with the median instead of mean here because some games had big outliers (one of the top 50 rated games had an average play time of 8,640 minutes).
+
+```{r}
+bgg |>
+  filter(rating_average >= 8.88) |>
+  arrange(desc(rating_average)) |>
+  summarize(median = median(play_time))
+```
+
+**Question 3:** Have board games gotten better/worse over the years according to ratings?
+
+**Answer:** Board game ratings have increased over time according to when the game was released.
+
+**Analysis:** According to the ratings, there was a steady increase over time until a massive spike in the 2010s, followed by another huge one for the 2020s. This is able to tell us that more recent games are significantly more well liked than older games, and games that weren’t published within the last two decades are extremely less liked than games in the past 20 years. This makes sense, because you expect products to continue to improve over time. However, one caveat to keep in mind is that it’s possible that these newer games just cater to this generation more, and that if these games were all available 50 years ago (just throwing a number out there for an example), older decades may be preferred and earn a higher rating.
+
+```{r}
+bgg |>
+filter(year_published>=1920) 
+year_to_decade <- function(year_published) {
+  ((year_published %/% 10) * 10)
+} 
+
+bgg_with_decades <- bgg |>
+  mutate(decade_published = year_to_decade(year_published))
+
+decade_ratings <- bgg_with_decades |>
+  group_by(decade_published) |>
+  summarize(average_rating = mean(rating_average)) |>
+  filter(decade_published>=1920)
+```
+
+**Question 4:** Is there a correlation between minimum age and complexity rating?
+
+**Answer:** There is a positive correlation between a game's minimum age and complexity rating.
+
+**Analysis:** The p value for all three of these is an extremely low number, which is a good thing for us because it shows us that there is definitely some statistical evidence. As a whole, we see a positive correlation between a game’s minimum age and complexity rating. However, the extent of the relation is even stronger when we modified the data so it only applies to kids (we choose ages 6-12). This makes tons of sense because at these ages, there’s a wide variety of where a kid may be developmentally. This is the age we’d expect to see the strongest correlation with because games for a 12 year old may be way too complicated for a 6 year old. Because we assumed that the minimum age and complexity is more applicable to kids, because teens and adults are generally expected to be able to process/comprehend the contents of complex games, we felt it was a good idea to zoom in more on the younger age group, and are findings do show the strongest correlation there. We also wanted to see how different it was for older players, and with minimum ages of at least 13, we actually found a negative correlation between minimum age and complexity ratings. This was somewhat surprising because of the stark contrast to the trend with younger players. However, the more we’ve thought about it, the more it makes sense. There probably aren’t many games that too complex for 13 year olds, and while there may be some, the main factor for an adults-only game not being suitable for young teens is likely it being inappropriate, not being too complex. In fact, some of the adult-catered games that come to mind (Cards against humanity, or drinking games) aren’t very complex at all, so this makes sense.
+
+```{r}
+bgg |>
+  select(min_age, complexity_average) |>
+  correlate()
+
+cor.test(bgg$min_age, bgg$complexity_average)
+
+bgg_kids_6_to_12 <- bgg |>
+  filter(min_age >= 6 & min_age <= 12)
+
+cor.test(bgg_kids_6_to_12$min_age, bgg_kids_6_to_12$complexity_average)
+
+bgg_older <- bgg |>
+  filter(min_age>=13)
+cor.test(bgg_older$min_age, bgg_older$complexity_average)
+```
+
+**Question 5:** How do the Amazon sales rankings compare to the Board Game Geek rankings? (top 50 games)
+
+**Answer:** There is not a strong correlation between Amazon sales rankings and Board Game Geek rankings.
+
+**Analysis:** This shows a very weak correlation (0.03707177) with a high p-value (0.8514) between the Amazon sales rankings and the Board Game Geek rankings, of about 30 games with matching names. Perhaps more Amazon sales data would show a much higher correlation (and reduce problems such as multiple versions sold of the same game), but it seems unlikely. Looking at the most popular games on Amazon — mostly family games — suggests the general board audience plays more casual games than does the Board Game Geek audience, which tends to favor more complex games. (The BGG rankings take into account both user ratings and to some extent how many ratings the game has.)
+
+```{r}
+#Trying to scrape Amazon best-selling games list to compare to rankings in our dataset. Getting a connection error though.
+
+#amazon_sales <- "https://www.amazon.com/Best-Sellers-Board-Games/zgbs/toys-and-games/166225011" |> read_html()
+
+#amazon_sales_results <- amazon_sales |> html_elements('img alt') |> as_tibble()
+
+#Instead entered the top 50 games manually from that page. 
+
+amazon <- read_csv("amazon_top_sales.csv") |> clean_names()
+
+amazon_merge <- amazon |> inner_join(bgg, by ='name') 
+
+cor.test(amazon_merge$amazon_sales_rank,  amazon_merge$bgg_rank)
+```
+
+**Memo:**
+
+The columns in our dataset inspired us to come up with questions that combined the different columns and aspects of board game data. First, we wanted to decide what type of board game received the highest average ratings on this website. We did this by filtering for each type of board game, averaging the ratings, and then finding the highest one, which was strategy games. Our second finding was the “perfect length” of a board game. To find this number, we filtered for the top 50 games with the highest average ratings and averaged their play times. We found that the “perfect” length according to our data is 120 minutes. Our third question was to see if board games have gotten better or worse over the years according to the data’s rankings. We found this by separating the games by the decade of their release and then averaging the ratings. Our fourth question asked if there was a correlation between complexity rating and minimum age. We found that there is a positive correlation between complexity and minimum age, which was strongest for kids games. This wasn’t the case for games that are intended for teens or adults, though. Finally, we combined our data set with Amazon sales data to see if higher-ranked games had more sales on Amazon. After trying to scrape the data, we could not get past an error and decided to manually input the sales for the top 50 games. We found a very weak correlation here and believe it to be because the people ranking board games in our dataset are into more niche games than the general audience buying more popular games on Amazon.\
+
+Our data, which had over 20,000 games, did include its fair share of limitations, though. One of our primary limitations was that there were some things that just weren’t filled out. Some of these could have been N/A’s. For example, if there’s not a maximum number of players for a game, which may be the case for some, it could be an N/A. Obviously there can’t be a maximum (or minimum) of 0 players, and there were examples of both. Additionally there were some games that had multiple entries/were included multiple times in the last. On top of that, there were some games that were barely owned and had few ratings (the minimum number of ratings was 30, but some had 0 or single-digit owned users). As a result, it makes you somewhat skeptical of a rating because the sample size is low, and makes you wonder why a high-rated game is barely owned (though there are some explanations such as cost, poor advertising, etc.) The BGG rankings, as opposed to ratings, take low number of ratings into account, but with a somewhat arbitrary method.
+
+Because of the limitations of this data set, I think a fuller reporting project would need to find a better one. Another dataset, with historical ratings going back to 2016, [compiled here](https://gitlab.com/recommend.games/bgg-ranking-historicals) could be used for this. That would allow analysis of trends in ratings among this group, showing how new games rise and fall in the rankings and perhaps uncovering what makes a new popular game have staying power or fade as a fad. We also would ideally have more complete sales data to clearly determine how correlated or not the Board Game Geek rankings are to game sales. We could also try comparing the ratings on the site to Amazon reviews or other site reviews to get a better sense of how the Board Game Geek audience differs or not from other audiences. To get interviews from real users, we could contact people on the Board Game Geek forums (and perhaps Amazon raters) to see if they would speak about why they rated a game a certain way (and why they rate games at all!).
